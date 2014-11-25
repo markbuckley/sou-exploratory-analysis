@@ -1,4 +1,4 @@
-sou-explorative-analysis
+sou-exploratory-analysis
 ========================
 
-Explorative analysis of the US State of the Union addresses
+Exploratory analysis of the US State of the Union addresses
