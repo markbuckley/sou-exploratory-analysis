@@ -8,9 +8,11 @@ Data sources
   http://stateoftheunion.onetwothree.net/texts/stateoftheunion1790-2014.txt.zip
 
 2. Party affiliation of the presidents
-
-  parties.csv
   
 3. Approval ratings of the presidents
 
   Source: http://www.presidency.ucsb.edu/data/popularity.php
+  
+4. US GDP growth rates, 1933-2014
+
+  Source: http://www.multpl.com/us-gdp-growth-rate/table/by-year

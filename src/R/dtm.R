@@ -14,6 +14,19 @@ createDTMFromFiles <- function(speechesFile, partiesFile) {
 }
 
 createDTM <- function(speeches) {
+  
+  corpus <- createCorpus(speeches)
+  
+  dtm <- DocumentTermMatrix(corpus)
+  
+  dtm <- removeSparseTerms(dtm,0.9)
+  dtm <- dtm[rowSums(as.matrix(dtm))>0,]
+
+  dtm
+}
+
+
+createCorpus <- function(speeches) {
   speechTexts <- as.vector(base64decodeVec(as.character(speeches$b64Text), what="c"))
   
   print (length(speechTexts))
@@ -27,13 +40,6 @@ createDTM <- function(speeches) {
   corpus <- tm_map(corpus, removePunctuation)
   corpus <- tm_map(corpus, removeNumbers)
   corpus <- tm_map(corpus, removeWords, c(stopwords("english"), extraStopwords))
-  
-  dtm <- DocumentTermMatrix(corpus)
-  
-  dtm <- removeSparseTerms(dtm,0.9)
-  dtm <- dtm[rowSums(as.matrix(dtm))>0,]
-  
-  #  dtm <- weightTfIdf(dtm)
-  dtm
 
+  corpus
 }
