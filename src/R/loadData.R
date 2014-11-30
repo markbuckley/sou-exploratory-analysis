@@ -1,5 +1,5 @@
 
-loadData <- function(speechesFilename, partiesFilename) {
+loadSpeechData <- function(speechesFilename, partiesFilename) {
   speeches <- read.csv(speechesFilename, header=F)
   colnames(speeches) <- c("title", "name", "dateStr", "b64Text")
   
@@ -13,6 +13,23 @@ loadData <- function(speechesFilename, partiesFilename) {
   speeches$subsequentYear <- subsequentYear(speeches$date)
     
   speeches <- merge(speeches, parties, all.x=T)
+}
+
+loadApprovalData <- function(filename) {
+  approval <- read.csv(filename)
+  
+  approval$start <- as.Date(approval$start, format="%m/%d/%Y")
+  approval$end <- as.Date(approval$end, format="%m/%d/%Y")
+  
+  approval
+}
+
+loadGdpGrowthData <- function(filename) {
+  gdp <- read.csv(filename)
+  
+  gdp$yearEnding <- format(as.Date(gdp$yearEnding, format="%b %d, %Y"), "%Y")
+  
+  gdp
 }
 
 # given a date, which is either december of january, what is the subsequent year
