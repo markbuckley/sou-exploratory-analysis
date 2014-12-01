@@ -3,39 +3,67 @@ library(NLP)
 library(parallel)
 
 source("src/R/loadData.R")
+source("src/R/dtm.R")
 
-
-doPosTagAnalysis <- function(speechesFile, partiesFile) {
+doPosTagAnalysis <- function(speechesFile, partiesFile, parallel=F) {
   speeches <- loadSpeechData(speechesFile, partiesFile)
-  
+ 
+#  speeches <- speeches[1:6, ]
+ 
   speechTexts <- as.vector(base64decodeVec(as.character(speeches$b64Text), what="c"))
   
-  threenessCounts <- mclapply(X=speechTexts, FUN=getThreenessCountFromText, mc.cores=3)
+  print("finished reading in data")
+
+  sent_token_annotator <- Maxent_Sent_Token_Annotator()
+  word_token_annotator <- Maxent_Word_Token_Annotator()
+  pos_tag_annotator <- Maxent_POS_Tag_Annotator()
+
+  if (parallel) {
+    cores <- 6
+    l <- length(speechTexts)
+    splits <- split(speechTexts, rep(1:cores, each=ceiling(l/cores))[1:l])
+
+    threeCountVec <- Vectorize(getThreenessCountFromText, "text")
+
+    threenessCounts <- mclapply(X=splits, FUN=function(x) {
+        threeCountVec(x, sent_token_annotator, word_token_annotator, pos_tag_annotator)
+      }, mc.cores=cores)
+ 
+    threenessCounts
+ 
+  } else {
+    threenessCounts <- lapply(X=speechTexts, FUN=function(x) {
+      getThreenessCountFromText(x, sent_token_annotator, word_token_annotator, pos_tag_annotator)
+    })
+
+    threenessCounts
+  }
+
+#  speeches$threenessCount <- threenessCounts
   
-  speeches$threenessCount <- threenessCounts
-  
-  speeches
+#  speeches
 }
 
 
-getThreenessCountFromText <- function(text) {
-  posTags <- getPosTagList(text)
+getThreenessCountFromText <- function(text, sent_token_annotator, word_token_annotator, pos_tag_annotator) {
+  print("*")
+  posTags <- getPosTagList(text, sent_token_annotator, word_token_annotator, pos_tag_annotator)
   posTagListCountThreeness(posTags)
 }
 
 
-getPosTagList <- function(s) {
+getPosTagList <- function(s, sent_token_annotator, word_token_annotator, pos_tag_annotator) {
   
   s <- as.String(s)
 
-  sent_token_annotator <- Maxent_Sent_Token_Annotator()
-  word_token_annotator <- Maxent_Word_Token_Annotator()
+#  sent_token_annotator <- Maxent_Sent_Token_Annotator()
+#  word_token_annotator <- Maxent_Word_Token_Annotator()
   a2 <- annotate(s, list(sent_token_annotator, word_token_annotator))
 
-  pos_tag_annotator <- Maxent_POS_Tag_Annotator()
+#  pos_tag_annotator <- Maxent_POS_Tag_Annotator()
 
   posTaggedSentence <- annotate(s, pos_tag_annotator, a2)
-  print(posTaggedSentence)
+#  print(posTaggedSentence)
   df <- as.data.frame(posTaggedSentence)
   
   as.vector(unlist(df[ df$type == "word", "features"]))
