@@ -1,6 +1,7 @@
 library(openNLP)
 library(NLP)
 library(parallel)
+library(ggplot2)
 
 source("src/R/loadData.R")
 source("src/R/dtm.R")
@@ -102,4 +103,21 @@ splitWithOverlap <- function(vec, seg.length, overlap) {
   ends[ends > length(vec)] = length(vec)
   
   lapply(1:length(starts), function(i) vec[starts[i]:ends[i]])
+}
+
+#speeches <- loadSpeechData("data/speeches.csv", "data/parties.csv")
+#threeness <- read.csv("results//threeCounts.csv")
+plotThreenessData <- function(speeches, threeness) {
+  colnames(threeness) <- c("index", "count")
+  data <- as.data.frame(cbind(speeches, threeness))
+  
+  data$decade <- data$subsequentYear - (data$subsequentYear %% 10)
+  
+  print(colnames(data))
+  
+  #d <- ddply(data, "decade", summarise, count = mean(count))
+  
+  g <- ggplot(data) +
+    geom_line(aes(subsequentYear, count))
+  g
 }
