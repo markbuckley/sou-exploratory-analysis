@@ -2,6 +2,7 @@ library(openNLP)
 library(NLP)
 library(parallel)
 library(ggplot2)
+library(plyr)
 
 source("src/R/loadData.R")
 source("src/R/dtm.R")
@@ -112,12 +113,18 @@ plotThreenessData <- function(speeches, threeness) {
   data <- as.data.frame(cbind(speeches, threeness))
   
   data$decade <- data$subsequentYear - (data$subsequentYear %% 10)
+  data$countPerChar <- data$count / unlist(lapply(as.character(data$b64Text), nchar))
   
   print(colnames(data))
   
-  #d <- ddply(data, "decade", summarise, count = mean(count))
+  d <- ddply(data, "decade", summarise, countPerChar = mean(countPerChar))
   
-  g <- ggplot(data) +
-    geom_line(aes(subsequentYear, count))
-  g
+  g <- ggplot(d) +
+    geom_line(aes(decade, countPerChar)) +
+    ylim(c(0,0.00027)) +
+    xlab("Decade of speech") +
+    ylab("Average number of uses of \"rule of three\" (normalised)")
+  print(g)
+  
+  data
 }
