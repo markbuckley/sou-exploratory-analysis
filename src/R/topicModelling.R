@@ -35,7 +35,10 @@ doTopicModelling <- function(speeches, corpus, topics=5, minTfIdf=0, termsFilena
   topicScores
 }
 
-
+# Things to do with topicScores:
+#   correlation of topic scores
+#   corrgram(topicScores[, -9], upper.panel=NULL)
+#   plot(density(speech.topics$majorityTopicScore))
 
 doLDA <- function(dtm, topics=5, termsFilename) {
   lda.model = LDA(dtm, control = list(alpha = 0.1), k=topics)
