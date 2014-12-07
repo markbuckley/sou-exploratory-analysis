@@ -30,7 +30,11 @@ plotSentimentResults <- function(speeches, pol, minYear=1950) {
   
   print(paste0("Average sentiment polarity: ", mean(pol)))
   
-  with(speeches, boxplot(polarity~party))
+  #with(speeches, boxplot(polarity~party))
+  g <- ggplot(speeches) + 
+    geom_boxplot(aes(party, polarity)) +
+    xlab("")
+  print(g)
   
   with(speeches, t.test(polarity~party))
 }
@@ -82,17 +86,25 @@ computeIndexedApprovalData <- function(speeches, approval, days) {
 }
 
 
-plotIndexedApprovalByDay <- function(speeches, approval, days=100) {
+plotIndexedApprovalByDay <- function(speeches, approval, days=100, minSpeechIndex=0) {
   
   data <- computeIndexedApprovalData(speeches, approval, days)
+  colnames(data
+           )
+  data <- data[ data$speechIndex > minSpeechIndex, ]
   
   midpoint <- mean(c(max(data$polarity), min(data$polarity)))
-  g <- ggplot(data) + 
+  print(midpoint)
+  
+  g <- ggplot(data) +
+    geom_hline(yintercept=100) +
     geom_line(aes(daySinceSpeech, rebasedApproval, group=speechIndex, colour=polarity)) +
-    scale_colour_gradient2(midpoint=midpoint) +
+    scale_colour_gradient2(midpoint=midpoint, low="red", high="blue") +
     #scale_y_continuous(limits=c(0, 5000))
     coord_cartesian(ylim = c(50, 150)) +
-    ylim(50,150)
+    ylim(50,150) +
+    xlab("Days after speech") +
+    ylab("Approval (day of speech = 100)")
   g
 }
 
